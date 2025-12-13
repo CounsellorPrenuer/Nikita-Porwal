@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -111,10 +112,18 @@ export function ServicesSection() {
               </div>
               <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
               <p className="text-muted-foreground text-sm mb-4">{service.shortDesc}</p>
-              <Button variant="ghost" size="sm" className="gap-2 p-0">
-                Learn More
-                <ArrowRight className="w-4 h-4" />
-              </Button>
+              <Link href="/services">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="gap-2 p-0"
+                  onClick={(e) => e.stopPropagation()}
+                  data-testid={`button-learn-more-${index}`}
+                >
+                  Learn More
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
             </Card>
           ))}
         </div>
