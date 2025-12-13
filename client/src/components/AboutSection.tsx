@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Award, Heart, Target, Users, ArrowRight } from "lucide-react";
-import nikitaPhoto from "@assets/NikitaPorwal1_-_Nikita_Porwal_1765611684547.JPG";
+import nikitaPhoto from "@assets/nikita-porwal.jpg";
 
 const highlights = [
   {

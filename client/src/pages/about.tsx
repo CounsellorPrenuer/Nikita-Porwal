@@ -9,7 +9,7 @@ import {
   ArrowRight,
   CheckCircle,
 } from "lucide-react";
-import nikitaPhoto from "@assets/NikitaPorwal1_-_Nikita_Porwal_1765611684547.JPG";
+import nikitaPhoto from "@assets/nikita-porwal.jpg";
 
 const timeline = [
   {

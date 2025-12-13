@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
 import { Menu, X } from "lucide-react";
-import logoImage from "@assets/EduVista_(1)_-_Nikita_Porwal_1765611627043.JPG";
+import logoImage from "@assets/eduvista-logo.jpg";
 
 const navLinks = [
   { href: "/", label: "Home" },
