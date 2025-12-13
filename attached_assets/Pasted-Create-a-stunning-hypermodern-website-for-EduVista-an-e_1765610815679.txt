@@ -1,0 +1,135 @@
+Create a stunning, hypermodern website for EduVista - an educational counseling service by Nikita Porwal.
+
+BRAND INFORMATION:
+- Business Name: EduVista
+- Website: www.eduvista.com
+- Contact: with.nikita@gmail.com | 9977777082
+- LinkedIn: https://www.linkedin.com/in/nikita-porwal-802900282
+- Logo/Brand Assets: https://drive.google.com/open?id=180TF6idrwf3jpEr-zClc7bcPkd_-Hhhd
+- Additional Assets: https://drive.google.com/open?id=1Gj6VwgWEdnywTmPm2pkn2a8jga7NyXzu
+
+DESIGN REQUIREMENTS:
+
+1. VISUAL STYLE - Hypermodern & Stunning:
+   - Use color scheme inspired by the EduVista logo (extract colors from provided logo file)
+   - Implement smooth, vibrant gradients throughout (mesh gradients, animated color transitions)
+   - Glassmorphism effects for cards and containers
+   - Neumorphism elements where appropriate
+   - Modern typography with variable fonts
+   - Micro-interactions on every interactive element
+   - Parallax scrolling effects
+   - 3D transform effects on hover
+   - Animated SVG illustrations
+
+2. ANIMATIONS & INTERACTIONS:
+   - Custom cursor animation (glowing trail effect that follows mouse)
+   - Smooth page transitions with GSAP or Framer Motion
+   - Scroll-triggered animations (fade-in, slide-in, scale)
+   - Floating elements with subtle movement
+   - Animated gradient backgrounds
+   - Loading animations with brand colors
+   - Button hover effects with ripple animations
+   - Text reveal animations
+   - Counter animations for statistics
+   - Smooth scrolling behavior
+
+3. THEME SYSTEM:
+   - Light and Dark mode toggle with smooth transition
+   - Unique color palette for each theme
+   - Theme preference saved to localStorage
+   - Animated theme switch (sun/moon icon with rotation)
+   - Adjust all gradients and effects for both themes
+
+4. USER PAGES & SECTIONS:
+
+   A. HOME PAGE:
+      - Hero section with animated gradient background, compelling headline, CTA buttons
+      - About Nikita section (use provided bio)
+      - Services overview with animated cards
+      - Why Choose EduVista section
+      - Testimonials carousel with smooth animations
+      - Statistics counter (15+ years experience, etc.)
+      - Contact form with validation
+      - Footer with social links
+
+   B. ABOUT PAGE:
+      - Detailed about Nikita Porwal
+      - Mission & Vision with icons
+      - Educational philosophy
+      - Timeline of experience
+      - Credentials and certifications
+
+   C. SERVICES PAGE:
+      - Student Development & Personalized Learning
+      - Parent Guidance and Awareness
+      - Teacher Mentoring
+      - Holistic NEP-aligned Growth
+      - Counseling Process (add detailed steps)
+      - Each service with hover effects and modal details
+
+   D. COUNSELING PROCESS:
+      - Step-by-step visual guide
+      - Interactive timeline
+      - What to expect section
+
+   E. CONTACT PAGE:
+      - Contact form with smooth validation
+      - Contact details (email, phone)
+      - LinkedIn integration
+      - Location map (if applicable)
+      - Appointment booking functionality
+
+5. ADMIN PANEL:
+   - Secure login page with animated background
+   - Dashboard with statistics
+   - Manage inquiries from contact form
+   - View appointment requests
+   - Content management (edit services, testimonials)
+   - User messages inbox
+   - Analytics overview (visitors, form submissions)
+   - Dark/Light theme toggle in admin too
+   - Responsive sidebar navigation
+   - Data tables with search and filter
+   - Export data functionality
+
+6. TECHNICAL FEATURES:
+   - Fully responsive (mobile-first approach)
+   - Fast loading with lazy loading images
+   - SEO optimized with meta tags
+   - Accessibility (ARIA labels, keyboard navigation)
+   - Form validation with error animations
+   - Toast notifications for user actions
+   - Smooth routing between pages
+   - Back-to-top button with animation
+   - WhatsApp click-to-chat integration
+   - Email integration for contact form
+
+7. UNIQUE ELEMENTS:
+   - Animated logo reveal on page load
+   - Interactive floating shapes in background
+   - Particle effects on hero section
+   - Morphing blob animations
+   - Animated testimonial cards
+   - Hover effects that reveal additional information
+   - Progress indicators for multi-step forms
+   - Skeleton loaders while content loads
+
+TECH STACK SUGGESTIONS:
+- React or Next.js for framework
+- Tailwind CSS for styling
+- Framer Motion for animations
+- GSAP for complex animations
+- React Hook Form for forms
+- Lucide React for icons
+- Recharts for admin analytics
+- MongoDB/Firebase for backend (if needed)
+
+FINAL NOTES:
+- Make it feel premium and cutting-edge
+- Every interaction should feel smooth and delightful
+- The design should inspire trust and professionalism
+- Keep user experience intuitive despite advanced UI
+- Ensure fast performance even with animations
+- Make the admin panel powerful but easy to use
+
+Build this as a complete, production-ready website with all files properly organized.
