@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Star, Sparkles } from "lucide-react";
 
 interface Package {
+  id: string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -26,6 +27,7 @@ const pricingCategories: Category[] = [
     name: "8-9 Students",
     packages: [
       {
+        id: "8-9-discover",
         name: "Discover",
         price: 5500,
         description: "Perfect for students starting their educational journey",
@@ -39,6 +41,7 @@ const pricingCategories: Category[] = [
         ],
       },
       {
+        id: "8-9-discover-plus",
         name: "Discover Plus+",
         price: 15000,
         description: "Comprehensive guidance for serious learners",
@@ -61,6 +64,7 @@ const pricingCategories: Category[] = [
     name: "10-12 Students",
     packages: [
       {
+        id: "10-12-achieve",
         name: "Achieve Online",
         price: 5999,
         description: "Stream selection and career pathway guidance",
@@ -74,6 +78,7 @@ const pricingCategories: Category[] = [
         ],
       },
       {
+        id: "10-12-achieve-plus",
         name: "Achieve Plus+",
         price: 10599,
         description: "Complete guidance for board exam students",
@@ -96,6 +101,7 @@ const pricingCategories: Category[] = [
     name: "College Graduates",
     packages: [
       {
+        id: "college-ascend",
         name: "Ascend Online",
         price: 6499,
         description: "Launch your career with expert guidance",
@@ -109,6 +115,7 @@ const pricingCategories: Category[] = [
         ],
       },
       {
+        id: "college-ascend-plus",
         name: "Ascend Plus+",
         price: 10599,
         description: "Comprehensive career launch program",
@@ -131,6 +138,7 @@ const pricingCategories: Category[] = [
     name: "Working Professionals",
     packages: [
       {
+        id: "working-ascend",
         name: "Ascend Online",
         price: 6499,
         description: "Navigate your career transition successfully",
@@ -144,6 +152,7 @@ const pricingCategories: Category[] = [
         ],
       },
       {
+        id: "working-ascend-plus",
         name: "Ascend Plus+",
         price: 10599,
         description: "Complete career transformation program",
@@ -164,7 +173,7 @@ const pricingCategories: Category[] = [
 ];
 
 interface PricingSectionProps {
-  onSelectPackage?: (category: string, packageName: string, price: number) => void;
+  onSelectPackage?: (packageId: string, packageName: string, price: number, categoryName: string) => void;
 }
 
 export function PricingSection({ onSelectPackage }: PricingSectionProps) {
@@ -172,7 +181,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
 
   const handleSelectPackage = (category: Category, pkg: Package) => {
     if (onSelectPackage) {
-      onSelectPackage(category.name, pkg.name, pkg.price);
+      onSelectPackage(pkg.id, pkg.name, pkg.price, category.name);
     }
   };
 
@@ -214,7 +223,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
               <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                 {category.packages.map((pkg, index) => (
                   <Card
-                    key={pkg.name}
+                    key={pkg.id}
                     className={`relative p-8 transition-all duration-300 hover-elevate ${
                       pkg.highlighted
                         ? "border-primary/50 bg-gradient-to-b from-primary/5 to-transparent"

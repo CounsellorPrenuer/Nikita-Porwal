@@ -35,9 +35,10 @@ interface CustomerInfo {
 export default function Pricing() {
   const { toast } = useToast();
   const [selectedPackage, setSelectedPackage] = useState<{
-    category: string;
+    packageId: string;
     name: string;
     price: number;
+    categoryName: string;
   } | null>(null);
   const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
@@ -66,9 +67,7 @@ export default function Pricing() {
 
   const createOrderMutation = useMutation({
     mutationFn: async (data: {
-      amount: number;
-      category: string;
-      packageName: string;
+      packageId: string;
       customerName: string;
       customerEmail: string;
       customerPhone: string;
@@ -120,6 +119,8 @@ export default function Pricing() {
     amount: number;
     currency: string;
     keyId: string;
+    packageName: string;
+    packagePrice: number;
   }) => {
     if (!window.Razorpay) {
       toast({
@@ -135,7 +136,7 @@ export default function Pricing() {
       amount: orderData.amount,
       currency: orderData.currency,
       name: "EduVista",
-      description: `${selectedPackage?.name} - ${selectedPackage?.category}`,
+      description: `${orderData.packageName} - ${selectedPackage?.categoryName}`,
       order_id: orderData.orderId,
       handler: function (response: {
         razorpay_payment_id: string;
@@ -170,8 +171,8 @@ export default function Pricing() {
     razorpayInstance.open();
   };
 
-  const handleSelectPackage = (category: string, name: string, price: number) => {
-    setSelectedPackage({ category, name, price });
+  const handleSelectPackage = (packageId: string, name: string, price: number, categoryName: string) => {
+    setSelectedPackage({ packageId, name, price, categoryName });
     
     if (!razorpayConfig?.configured) {
       toast({
@@ -196,10 +197,27 @@ export default function Pricing() {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(customerInfo.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (customerInfo.phone.length < 10) {
+      toast({
+        title: "Invalid Phone",
+        description: "Please enter a valid phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     createOrderMutation.mutate({
-      amount: selectedPackage.price,
-      category: selectedPackage.category,
-      packageName: selectedPackage.name,
+      packageId: selectedPackage.packageId,
       customerName: customerInfo.name,
       customerEmail: customerInfo.email,
       customerPhone: customerInfo.phone,
@@ -252,7 +270,7 @@ export default function Pricing() {
             <DialogDescription>
               {selectedPackage && (
                 <>
-                  {selectedPackage.name} package for {selectedPackage.category} -{" "}
+                  {selectedPackage.name} package for {selectedPackage.categoryName} -{" "}
                   <span className="font-semibold text-foreground">
                     {selectedPackage.price.toLocaleString("en-IN", {
                       style: "currency",

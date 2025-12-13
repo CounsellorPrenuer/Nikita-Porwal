@@ -3,6 +3,15 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { z } from "zod";
+import { getPackageById, getCategoryById } from "@shared/pricing";
+
+const createOrderSchema = z.object({
+  packageId: z.string().min(1),
+  customerName: z.string().min(1),
+  customerEmail: z.string().email(),
+  customerPhone: z.string().min(10),
+});
 
 export async function registerRoutes(
   httpServer: Server,
@@ -26,22 +35,29 @@ export async function registerRoutes(
         return res.status(500).json({ error: "Razorpay is not configured" });
       }
 
-      const { amount, category, packageName, customerName, customerEmail, customerPhone } = req.body;
+      const parseResult = createOrderSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid request data", details: parseResult.error.errors });
+      }
 
-      if (!amount || !category || !packageName) {
-        return res.status(400).json({ error: "Missing required fields" });
+      const { packageId, customerName, customerEmail, customerPhone } = parseResult.data;
+
+      const pkg = getPackageById(packageId);
+      if (!pkg) {
+        return res.status(400).json({ error: "Invalid package selected" });
       }
 
       const options = {
-        amount: Math.round(amount * 100),
+        amount: Math.round(pkg.price * 100),
         currency: "INR",
         receipt: `receipt_${Date.now()}`,
         notes: {
-          category,
-          packageName,
-          customerName: customerName || "",
-          customerEmail: customerEmail || "",
-          customerPhone: customerPhone || "",
+          packageId,
+          packageName: pkg.name,
+          packagePrice: pkg.price.toString(),
+          customerName,
+          customerEmail,
+          customerPhone,
         },
       };
 
@@ -51,6 +67,8 @@ export async function registerRoutes(
         amount: order.amount,
         currency: order.currency,
         keyId: razorpayKeyId,
+        packageName: pkg.name,
+        packagePrice: pkg.price,
       });
     } catch (error: any) {
       console.error("Error creating Razorpay order:", error);
