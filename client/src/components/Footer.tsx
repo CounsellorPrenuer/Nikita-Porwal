@@ -1,8 +1,9 @@
 import { Link } from "wouter";
-import { GraduationCap, Mail, Phone, Linkedin, ArrowUp } from "lucide-react";
+import { Mail, Phone, Linkedin, ArrowUp } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import logoImage from "@assets/EduVista_(1)_-_Nikita_Porwal_1765611627043.JPG";
 
 const quickLinks = [
   { href: "/", label: "Home" },
@@ -41,12 +42,7 @@ export function Footer() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-md bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <GraduationCap className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  EduVista
-                </span>
+                <img src={logoImage} alt="EduVista Logo" className="h-14 w-auto" />
               </Link>
               <p className="text-sm text-muted-foreground mb-4">
                 Transforming educational journeys through personalized counseling and 

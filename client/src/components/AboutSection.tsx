@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Award, Heart, Target, Users, ArrowRight } from "lucide-react";
+import nikitaPhoto from "@assets/NikitaPorwal1_-_Nikita_Porwal_1765611684547.JPG";
 
 const highlights = [
   {
@@ -63,20 +64,16 @@ export function AboutSection() {
           </div>
 
           <div className="order-1 lg:order-2">
-            <div className="grid grid-cols-2 gap-4">
-              {highlights.map((item, index) => (
-                <Card
-                  key={item.title}
-                  className="p-6 bg-card/80 backdrop-blur-sm border-border/50 hover-elevate transition-all duration-300"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="w-12 h-12 rounded-md bg-gradient-to-br from-primary to-accent flex items-center justify-center mb-4">
-                    <item.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-semibold mb-2">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
-                </Card>
-              ))}
+            <div className="relative">
+              <div className="aspect-[4/5] rounded-md overflow-hidden shadow-2xl">
+                <img
+                  src={nikitaPhoto}
+                  alt="Nikita Porwal - Educational Counselor"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-accent/20 rounded-full blur-3xl" />
+              <div className="absolute -top-4 -left-4 w-24 h-24 bg-primary/20 rounded-full blur-3xl" />
             </div>
           </div>
         </div>

@@ -2,16 +2,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import {
-  GraduationCap,
   Heart,
   Target,
   Users,
-  Award,
-  BookOpen,
   Star,
   ArrowRight,
   CheckCircle,
 } from "lucide-react";
+import nikitaPhoto from "@assets/NikitaPorwal1_-_Nikita_Porwal_1765611684547.JPG";
 
 const timeline = [
   {
@@ -139,10 +137,12 @@ export default function About() {
               </Link>
             </div>
             <div className="relative">
-              <div className="aspect-square rounded-md bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                <div className="w-40 h-40 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <GraduationCap className="w-20 h-20 text-white" />
-                </div>
+              <div className="aspect-[4/5] rounded-md overflow-hidden shadow-2xl">
+                <img
+                  src={nikitaPhoto}
+                  alt="Nikita Porwal - Educational Counselor"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-accent/20 rounded-full blur-3xl" />
               <div className="absolute -top-4 -left-4 w-24 h-24 bg-primary/20 rounded-full blur-3xl" />
