@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -296,9 +297,11 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
           <p className="text-muted-foreground mb-4">
             Need a customized package? We can create one just for you.
           </p>
-          <Button variant="outline" size="lg" data-testid="button-custom-package">
-            Contact for Custom Package
-          </Button>
+          <Link href="/contact">
+            <Button variant="outline" size="lg" data-testid="button-custom-package">
+              Contact for Custom Package
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
