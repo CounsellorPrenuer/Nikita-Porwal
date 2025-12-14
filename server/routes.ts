@@ -175,7 +175,7 @@ export async function registerRoutes(
   });
 
   // Admin API routes - Reviews
-  app.get("/api/admin/reviews", isAuthenticated, async (req, res) => {
+  app.get("/api/admin/reviews", async (req, res) => {
     try {
       const reviews = await storage.getReviews();
       res.json(reviews);
@@ -185,7 +185,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/reviews", isAuthenticated, async (req, res) => {
+  app.post("/api/admin/reviews", async (req, res) => {
     try {
       const parseResult = insertReviewSchema.safeParse(req.body);
       if (!parseResult.success) {
@@ -199,7 +199,7 @@ export async function registerRoutes(
     }
   });
 
-  app.put("/api/admin/reviews/:id", isAuthenticated, async (req, res) => {
+  app.put("/api/admin/reviews/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updateSchema = insertReviewSchema.partial();
@@ -218,7 +218,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/admin/reviews/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/admin/reviews/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const success = await storage.deleteReview(id);
@@ -233,7 +233,7 @@ export async function registerRoutes(
   });
 
   // Admin API routes - Blogs
-  app.get("/api/admin/blogs", isAuthenticated, async (req, res) => {
+  app.get("/api/admin/blogs", async (req, res) => {
     try {
       const blogs = await storage.getBlogs();
       res.json(blogs);
@@ -243,7 +243,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/admin/blogs", isAuthenticated, async (req, res) => {
+  app.post("/api/admin/blogs", async (req, res) => {
     try {
       const parseResult = insertBlogSchema.safeParse(req.body);
       if (!parseResult.success) {
@@ -257,7 +257,7 @@ export async function registerRoutes(
     }
   });
 
-  app.put("/api/admin/blogs/:id", isAuthenticated, async (req, res) => {
+  app.put("/api/admin/blogs/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updateSchema = insertBlogSchema.partial();
@@ -276,7 +276,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/admin/blogs/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/admin/blogs/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const success = await storage.deleteBlog(id);
@@ -291,7 +291,7 @@ export async function registerRoutes(
   });
 
   // AI Blog Generation
-  app.post("/api/admin/blogs/generate", isAuthenticated, async (req, res) => {
+  app.post("/api/admin/blogs/generate", async (req, res) => {
     try {
       const { topic } = req.body;
       if (!topic) {
@@ -338,7 +338,7 @@ export async function registerRoutes(
   });
 
   // Object storage - Upload URL
-  app.post("/api/objects/upload-url", isAuthenticated, async (req, res) => {
+  app.post("/api/objects/upload-url", async (req, res) => {
     try {
       const { fileName, contentType } = req.body;
       if (!fileName || !contentType) {
@@ -358,7 +358,7 @@ export async function registerRoutes(
   });
 
   // Make uploaded file public and get URL
-  app.post("/api/objects/make-public", isAuthenticated, async (req, res) => {
+  app.post("/api/objects/make-public", async (req, res) => {
     try {
       const { objectPath } = req.body;
       if (!objectPath) {

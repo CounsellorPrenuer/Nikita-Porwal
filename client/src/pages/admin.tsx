@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +16,6 @@ import {
   CreditCard,
   MousePointer,
   LayoutDashboard,
-  LogOut,
   ExternalLink,
   Phone,
   Mail,
@@ -38,7 +36,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { SiWhatsapp, SiInstagram, SiLinkedin, SiYoutube } from "react-icons/si";
-import type { User, Review, Blog } from "@shared/schema";
+import type { Review, Blog } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
 interface WebsiteButton {
@@ -480,25 +478,13 @@ function BlogsTab() {
 }
 
 export default function Admin() {
-  const { user } = useAuth();
-  const typedUser = user as User | undefined;
-
-  const handleLogout = () => {
-    window.location.href = "/api/logout";
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 pt-24">
         <div className="flex flex-col gap-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground" data-testid="text-admin-title">Admin Dashboard</h1>
-              <p className="text-muted-foreground mt-1">Welcome back, {typedUser?.firstName || typedUser?.email || "Admin"}</p>
-            </div>
-            <Button variant="outline" onClick={handleLogout} data-testid="button-logout">
-              <LogOut className="w-4 h-4 mr-2" />Logout
-            </Button>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground" data-testid="text-admin-title">Admin Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Manage your website content</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
