@@ -7,7 +7,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme-context";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Home from "@/pages/home";
 import About from "@/pages/about";
 import Services from "@/pages/services";
@@ -37,20 +36,12 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ProtectedAdmin() {
-  return (
-    <ProtectedRoute>
-      <Admin />
-    </ProtectedRoute>
-  );
-}
-
 function Router() {
   const [location] = useLocation();
   const isAdminRoute = location.startsWith("/admin");
 
   if (isAdminRoute) {
-    return <ProtectedAdmin />;
+    return <Admin />;
   }
 
   return (
