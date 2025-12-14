@@ -478,13 +478,73 @@ function BlogsTab() {
 }
 
 export default function Admin() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem("adminAuth") === "true";
+  });
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { toast } = useToast();
+
+  const handleLogin = () => {
+    if (password === "123") {
+      sessionStorage.setItem("adminAuth", "true");
+      setIsAuthenticated(true);
+      setError("");
+      toast({ title: "Welcome to Admin Dashboard" });
+    } else {
+      setError("Incorrect password");
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminAuth");
+    setIsAuthenticated(false);
+    setPassword("");
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="w-full max-w-md mx-4">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Admin Login</CardTitle>
+            <CardDescription>Enter password to access the admin dashboard</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+                placeholder="Enter password"
+                data-testid="input-admin-password"
+              />
+              {error && <p className="text-sm text-destructive">{error}</p>}
+            </div>
+            <Button onClick={handleLogin} className="w-full" data-testid="button-admin-login">
+              Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 pt-24">
         <div className="flex flex-col gap-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground" data-testid="text-admin-title">Admin Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Manage your website content</p>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground" data-testid="text-admin-title">Admin Dashboard</h1>
+              <p className="text-muted-foreground mt-1">Manage your website content</p>
+            </div>
+            <Button variant="outline" onClick={handleLogout} data-testid="button-logout">
+              Logout
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
