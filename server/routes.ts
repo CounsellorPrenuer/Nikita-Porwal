@@ -6,6 +6,15 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { z } from "zod";
 import { getPackageById } from "@shared/pricing";
+import { insertReviewSchema, insertBlogSchema } from "@shared/schema";
+import { getSignedUploadUrl, getPublicUrl } from "./objectStorage";
+import { makePublic } from "./objectAcl";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+});
 
 const createOrderSchema = z.object({
   packageId: z.string().min(1),
@@ -129,6 +138,234 @@ export async function registerRoutes(
       configured: !!razorpay,
       keyId: razorpayKeyId || null,
     });
+  });
+
+  // Public API routes
+  app.get("/api/reviews", async (req, res) => {
+    try {
+      const reviews = await storage.getVisibleReviews();
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  app.get("/api/blogs", async (req, res) => {
+    try {
+      const blogs = await storage.getPublishedBlogs();
+      res.json(blogs);
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
+      res.status(500).json({ message: "Failed to fetch blogs" });
+    }
+  });
+
+  app.get("/api/blogs/:slug", async (req, res) => {
+    try {
+      const blog = await storage.getBlogBySlug(req.params.slug);
+      if (!blog || blog.status !== "published") {
+        return res.status(404).json({ message: "Blog not found" });
+      }
+      res.json(blog);
+    } catch (error) {
+      console.error("Error fetching blog:", error);
+      res.status(500).json({ message: "Failed to fetch blog" });
+    }
+  });
+
+  // Admin API routes - Reviews
+  app.get("/api/admin/reviews", isAuthenticated, async (req, res) => {
+    try {
+      const reviews = await storage.getReviews();
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  app.post("/api/admin/reviews", isAuthenticated, async (req, res) => {
+    try {
+      const parseResult = insertReviewSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid data", details: parseResult.error.errors });
+      }
+      const review = await storage.createReview(parseResult.data);
+      res.json(review);
+    } catch (error) {
+      console.error("Error creating review:", error);
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  app.put("/api/admin/reviews/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const review = await storage.updateReview(id, req.body);
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      res.json(review);
+    } catch (error) {
+      console.error("Error updating review:", error);
+      res.status(500).json({ message: "Failed to update review" });
+    }
+  });
+
+  app.delete("/api/admin/reviews/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteReview(id);
+      if (!success) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      res.status(500).json({ message: "Failed to delete review" });
+    }
+  });
+
+  // Admin API routes - Blogs
+  app.get("/api/admin/blogs", isAuthenticated, async (req, res) => {
+    try {
+      const blogs = await storage.getBlogs();
+      res.json(blogs);
+    } catch (error) {
+      console.error("Error fetching blogs:", error);
+      res.status(500).json({ message: "Failed to fetch blogs" });
+    }
+  });
+
+  app.post("/api/admin/blogs", isAuthenticated, async (req, res) => {
+    try {
+      const parseResult = insertBlogSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid data", details: parseResult.error.errors });
+      }
+      const blog = await storage.createBlog(parseResult.data);
+      res.json(blog);
+    } catch (error) {
+      console.error("Error creating blog:", error);
+      res.status(500).json({ message: "Failed to create blog" });
+    }
+  });
+
+  app.put("/api/admin/blogs/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const blog = await storage.updateBlog(id, req.body);
+      if (!blog) {
+        return res.status(404).json({ message: "Blog not found" });
+      }
+      res.json(blog);
+    } catch (error) {
+      console.error("Error updating blog:", error);
+      res.status(500).json({ message: "Failed to update blog" });
+    }
+  });
+
+  app.delete("/api/admin/blogs/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteBlog(id);
+      if (!success) {
+        return res.status(404).json({ message: "Blog not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      res.status(500).json({ message: "Failed to delete blog" });
+    }
+  });
+
+  // AI Blog Generation
+  app.post("/api/admin/blogs/generate", isAuthenticated, async (req, res) => {
+    try {
+      const { topic } = req.body;
+      if (!topic) {
+        return res.status(400).json({ error: "Topic is required" });
+      }
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional blog writer for EduVista, an education counseling company. Write engaging, informative blog posts about career guidance, education planning, and student success. Format your response as JSON with fields: title, summary (2-3 sentences), body (full HTML-formatted blog content with paragraphs, headings, and lists where appropriate)."
+          },
+          {
+            role: "user",
+            content: `Write a blog post about: ${topic}`
+          }
+        ],
+        response_format: { type: "json_object" },
+      });
+
+      const content = completion.choices[0]?.message?.content;
+      if (!content) {
+        return res.status(500).json({ error: "Failed to generate content" });
+      }
+
+      const parsed = JSON.parse(content);
+      const slug = parsed.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+
+      res.json({
+        title: parsed.title,
+        slug: `${slug}-${Date.now()}`,
+        summary: parsed.summary,
+        body: parsed.body,
+        generatedWithAi: true,
+      });
+    } catch (error: any) {
+      console.error("Error generating blog:", error);
+      res.status(500).json({ error: error.message || "Failed to generate blog" });
+    }
+  });
+
+  // Object storage - Upload URL
+  app.post("/api/objects/upload-url", isAuthenticated, async (req, res) => {
+    try {
+      const { fileName, contentType } = req.body;
+      if (!fileName || !contentType) {
+        return res.status(400).json({ error: "fileName and contentType are required" });
+      }
+
+      const result = await getSignedUploadUrl(fileName, contentType);
+      if (!result) {
+        return res.status(500).json({ error: "Object storage not configured" });
+      }
+
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error getting upload URL:", error);
+      res.status(500).json({ error: error.message || "Failed to get upload URL" });
+    }
+  });
+
+  // Make uploaded file public and get URL
+  app.post("/api/objects/make-public", isAuthenticated, async (req, res) => {
+    try {
+      const { objectPath } = req.body;
+      if (!objectPath) {
+        return res.status(400).json({ error: "objectPath is required" });
+      }
+
+      const success = await makePublic(objectPath);
+      if (!success) {
+        return res.status(500).json({ error: "Failed to make object public" });
+      }
+
+      const publicUrl = getPublicUrl(objectPath);
+      res.json({ url: publicUrl });
+    } catch (error: any) {
+      console.error("Error making object public:", error);
+      res.status(500).json({ error: error.message || "Failed to make object public" });
+    }
   });
 
   return httpServer;
