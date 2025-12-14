@@ -202,7 +202,12 @@ export async function registerRoutes(
   app.put("/api/admin/reviews/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const review = await storage.updateReview(id, req.body);
+      const updateSchema = insertReviewSchema.partial();
+      const parseResult = updateSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid data", details: parseResult.error.errors });
+      }
+      const review = await storage.updateReview(id, parseResult.data);
       if (!review) {
         return res.status(404).json({ message: "Review not found" });
       }
@@ -255,7 +260,12 @@ export async function registerRoutes(
   app.put("/api/admin/blogs/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const blog = await storage.updateBlog(id, req.body);
+      const updateSchema = insertBlogSchema.partial();
+      const parseResult = updateSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid data", details: parseResult.error.errors });
+      }
+      const blog = await storage.updateBlog(id, parseResult.data);
       if (!blog) {
         return res.status(404).json({ message: "Blog not found" });
       }
