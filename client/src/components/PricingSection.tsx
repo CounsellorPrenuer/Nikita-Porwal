@@ -141,11 +141,11 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
 
                 {pricingCategories.map((category) => (
                   <TabsContent key={category.id} value={category.id} className="mt-0">
-                    <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
                       {category.packages.map((pkg, index) => (
                         <Card
                           key={pkg.id}
-                          className={`relative p-8 transition-all duration-300 hover-elevate overflow-hidden ${pkg.highlighted
+                          className={`relative p-8 transition-all duration-300 hover-elevate overflow-hidden flex flex-col ${pkg.highlighted
                             ? "border-primary/50 shadow-lg"
                             : "bg-card/80 backdrop-blur-sm border-border/50"
                             }`}
@@ -175,7 +175,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                             </div>
                           </div>
 
-                          <ul className="space-y-4 mb-8 relative z-10 min-h-[160px]">
+                          <ul className="space-y-4 mb-8 relative z-10 flex-grow">
                             {pkg.features?.map((feature, featureIndex) => (
                               <li key={featureIndex} className="flex items-start gap-4">
                                 <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -186,13 +186,9 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                             ))}
                           </ul>
 
-                          <div className="relative z-10 pt-4">
+                          <div className="relative z-10 pt-4 mt-auto">
                             <Button
-                              className={`w-full group ${pkg.highlighted
-                                ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-md hover:shadow-lg transition-all"
-                                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                                }`}
-                              variant={pkg.highlighted ? "default" : "secondary"}
+                              className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-md hover:shadow-lg transition-all group"
                               size="lg"
                               onClick={() => handleSelectPackage(category, pkg)}
                             >
