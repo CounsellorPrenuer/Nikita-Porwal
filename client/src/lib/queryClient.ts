@@ -1,4 +1,8 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { MOCK_USER, MOCK_REVIEWS, MOCK_BLOGS } from "./mockData";
+import { sanityClient } from "./sanity";
+
+const RAZORPAY_WORKER_URL = "https://nikita-porwal.garyphadale.workers.dev";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -7,19 +11,30 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-import { MOCK_RAZORPAY_CONFIG, MOCK_USER, MOCK_REVIEWS, MOCK_BLOGS } from "./mockData";
-import { sanityClient } from "./sanity";
-
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  console.log(`[MOCK] ${method} ${url}`, data);
+  console.log(`[API] ${method} ${url}`, data);
 
-  // Mock API responses
+  // Route Razorpay API calls to the Cloudflare Worker
   if (url === "/api/razorpay/create-order") {
-    return new Response(JSON.stringify({ error: "Payment system not available in static mode" }), { status: 400 });
+    const res = await fetch(`${RAZORPAY_WORKER_URL}/api/razorpay/create-order`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return res;
+  }
+
+  if (url === "/api/razorpay/verify-payment") {
+    const res = await fetch(`${RAZORPAY_WORKER_URL}/api/razorpay/verify-payment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return res;
   }
 
   return new Response(JSON.stringify({}), { status: 200 });
@@ -32,10 +47,19 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
     async ({ queryKey }) => {
       const url = queryKey.join("/");
-      console.log(`[MOCK] GET ${url}`);
+      console.log(`[API] GET ${url}`);
 
-      if (url === "/api/razorpay/config") return MOCK_RAZORPAY_CONFIG as any;
-      if (url === "/api/user") return MOCK_USER as any; // Simulate logged out
+      if (url === "/api/razorpay/config") {
+        try {
+          const res = await fetch(`${RAZORPAY_WORKER_URL}/api/razorpay/config`);
+          return await res.json();
+        } catch (err) {
+          console.error("Failed to fetch Razorpay config", err);
+          return { configured: false, keyId: null };
+        }
+      }
+
+      if (url === "/api/user") return MOCK_USER as any;
 
       if (url === "/api/admin/reviews") {
         try {
@@ -57,7 +81,6 @@ export const getQueryFn: <T>(options: {
         }
       }
 
-      // Default empty response
       return null;
     };
 

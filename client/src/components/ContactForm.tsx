@@ -52,7 +52,7 @@ export function ContactForm() {
 
   const onSubmit = async (data: FormData) => {
     try {
-      // First, attempt to save the contact in the database
+      // Save contact to Cloudflare D1 database
       const response = await fetch("https://nikita-porwal.garyphadale.workers.dev/api/contact", {
         method: "POST",
         headers: {
@@ -65,19 +65,28 @@ export function ContactForm() {
         throw new Error("Failed to save contact");
       }
 
-      // Then, construct the subject and body for the email
-      const subject = encodeURIComponent(`New Inquiry from ${data.name}`);
-      const bodyText = `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nInquiry Type: ${data.inquiryType}\n\nMessage:\n${data.message}`;
-      const body = encodeURIComponent(bodyText);
-
-      // Trigger the email
-      window.location.href = `mailto:with.nikita@gmail.com?subject=${subject}&body=${body}`;
-
+      // Show success immediately
       setIsSubmitted(true);
       toast({
         title: "Message Sent!",
         description: "We'll get back to you within 24 hours.",
       });
+
+      // Open mailto in a new window for cross-browser support
+      const subject = encodeURIComponent(`New Inquiry from ${data.name}`);
+      const bodyText = `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nInquiry Type: ${data.inquiryType}\n\nMessage:\n${data.message}`;
+      const body = encodeURIComponent(bodyText);
+      const mailtoUrl = `mailto:with.nikita@gmail.com?subject=${subject}&body=${body}`;
+
+      // Use a hidden anchor + click for maximum browser compatibility
+      const mailLink = document.createElement("a");
+      mailLink.href = mailtoUrl;
+      mailLink.target = "_blank";
+      mailLink.rel = "noopener noreferrer";
+      document.body.appendChild(mailLink);
+      mailLink.click();
+      document.body.removeChild(mailLink);
+
       setTimeout(() => {
         setIsSubmitted(false);
         form.reset();
