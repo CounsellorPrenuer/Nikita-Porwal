@@ -4,9 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Check, Star, Sparkles, Loader2, ArrowRight } from "lucide-react";
+import { Check, Star, Sparkles, Loader2, ArrowRight, CreditCard } from "lucide-react";
 import { sanityClient } from "@/lib/sanity";
-import { RazorpayButton } from "./RazorpayButton";
 
 interface Package {
   id: string;
@@ -26,6 +25,7 @@ interface Category {
 }
 
 interface CustomPackage {
+  _id?: string;
   id: string;
   title: string;
   description: string;
@@ -37,7 +37,7 @@ interface PricingSectionProps {
 }
 
 export function PricingSection({ onSelectPackage }: PricingSectionProps) {
-  const [activeTab, setActiveTab] = useState("8-9");
+  const [activeTab, setActiveTab] = useState("");
   const [pricingCategories, setPricingCategories] = useState<Category[]>([]);
   const [customPackages, setCustomPackages] = useState<CustomPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,19 +61,20 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
         }`;
 
         const customQuery = `*[_type == "customPackage"] | order(orderId asc) {
-          id,
+          "id": _id,
+          "planId": id,
           title,
           description,
           price
         }`;
 
-        const [categories, customPgks] = await Promise.all([
+        const [categories, customPkgs] = await Promise.all([
           sanityClient.fetch(query),
           sanityClient.fetch(customQuery)
         ]);
 
         setPricingCategories(categories);
-        setCustomPackages(customPgks);
+        setCustomPackages(customPkgs);
 
         if (categories.length > 0) {
           setActiveTab(categories[0].id);
@@ -93,15 +94,10 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
     }
   };
 
-  const handleCustomPackageInquiry = (pkgName: string) => {
-    const subject = encodeURIComponent(`Inquiry for Custom Package: ${pkgName}`);
-    const body = encodeURIComponent(`Hi!\n\nI am interested in the ${pkgName} package. Please let me know how I can proceed.\n\nThanks!`);
-    const mailLink = document.createElement("a");
-    mailLink.href = `mailto:with.nikita@gmail.com?subject=${subject}&body=${body}`;
-    mailLink.target = "_blank";
-    document.body.appendChild(mailLink);
-    mailLink.click();
-    document.body.removeChild(mailLink);
+  const handleSelectCustomPackage = (pkg: CustomPackage) => {
+    if (onSelectPackage) {
+      onSelectPackage(pkg.id, pkg.title, pkg.price, "Custom Plan");
+    }
   };
 
   return (
@@ -137,7 +133,6 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                       key={category.id}
                       value={category.id}
                       className="py-3 px-4 text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                      data-testid={`tab-${category.id}`}
                     >
                       {category.name}
                     </TabsTrigger>
@@ -154,7 +149,6 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                             ? "border-primary/50 shadow-lg"
                             : "bg-card/80 backdrop-blur-sm border-border/50"
                             }`}
-                          data-testid={`card-package-${category.id}-${index}`}
                         >
                           {pkg.highlighted && (
                             <div className="absolute top-0 right-0 h-full w-full bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
@@ -179,15 +173,6 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                                 })}
                               </span>
                             </div>
-                            {pkg.originalPrice && (
-                              <p className="text-muted-foreground text-sm line-through mt-1">
-                                {pkg.originalPrice.toLocaleString("en-IN", {
-                                  style: "currency",
-                                  currency: "INR",
-                                  maximumFractionDigits: 0,
-                                })}
-                              </p>
-                            )}
                           </div>
 
                           <ul className="space-y-4 mb-8 relative z-10 min-h-[160px]">
@@ -202,23 +187,19 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                           </ul>
 
                           <div className="relative z-10 pt-4">
-                            {pkg.paymentButtonId ? (
-                              <RazorpayButton paymentButtonId={pkg.paymentButtonId} />
-                            ) : (
-                              <Button
-                                className={`w-full group ${pkg.highlighted
-                                  ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-md hover:shadow-lg transition-all"
-                                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                                  }`}
-                                variant={pkg.highlighted ? "default" : "secondary"}
-                                size="lg"
-                                onClick={() => handleSelectPackage(category, pkg)}
-                                data-testid={`button-select-${category.id}-${index}`}
-                              >
-                                Choose {pkg.name}
-                                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                              </Button>
-                            )}
+                            <Button
+                              className={`w-full group ${pkg.highlighted
+                                ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-md hover:shadow-lg transition-all"
+                                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                                }`}
+                              variant={pkg.highlighted ? "default" : "secondary"}
+                              size="lg"
+                              onClick={() => handleSelectPackage(category, pkg)}
+                            >
+                              <CreditCard className="w-4 h-4 mr-2" />
+                              Buy Now
+                              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                            </Button>
                           </div>
                         </Card>
                       ))}
@@ -251,13 +232,13 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                           })}
                         </span>
                         <Button
-                          variant="outline"
                           size="sm"
-                          className="hover:bg-primary hover:text-primary-foreground group"
-                          onClick={() => handleCustomPackageInquiry(pkg.title)}
+                          className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white group"
+                          onClick={() => handleSelectCustomPackage(pkg)}
                         >
-                          Inquire
-                          <ArrowRight className="w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform" />
+                          <CreditCard className="w-3 h-3 mr-1.5" />
+                          Buy Now
+                          <ArrowRight className="w-3 h-3 ml-1.5 group-hover:translate-x-1 transition-transform" />
                         </Button>
                       </div>
                     </Card>
