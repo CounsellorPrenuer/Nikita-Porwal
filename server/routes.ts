@@ -47,7 +47,7 @@ export async function registerRoutes(
   const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
 
   let razorpay: Razorpay | null = null;
-  
+
   if (razorpayKeyId && razorpayKeySecret) {
     razorpay = new Razorpay({
       key_id: razorpayKeyId,
@@ -130,6 +130,23 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Error verifying payment:", error);
       res.status(500).json({ error: error.message || "Payment verification failed" });
+    }
+  });
+
+  app.post("/api/contact", async (req, res) => {
+    try {
+      const { insertContactSchema } = await import("@shared/schema");
+      const parseResult = insertContactSchema.safeParse(req.body);
+
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid contact data", details: parseResult.error.errors });
+      }
+
+      const contact = await storage.createContact(parseResult.data);
+      res.json({ success: true, contact });
+    } catch (error: any) {
+      console.error("Error saving contact:", error);
+      res.status(500).json({ error: error.message || "Failed to save contact" });
     }
   });
 

@@ -71,3 +71,18 @@ export const blogs = pgTable("blogs", {
 export const insertBlogSchema = createInsertSchema(blogs).omit({ id: true, createdAt: true });
 export type InsertBlog = z.infer<typeof insertBlogSchema>;
 export type Blog = typeof blogs.$inferSelect;
+
+// Contacts table
+export const contacts = pgTable("contacts", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 50 }).notNull(),
+  inquiryType: varchar("inquiry_type", { length: 100 }).notNull(),
+  message: text("message").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertContactSchema = createInsertSchema(contacts).omit({ id: true, createdAt: true });
+export type InsertContact = z.infer<typeof insertContactSchema>;
+export type Contact = typeof contacts.$inferSelect;

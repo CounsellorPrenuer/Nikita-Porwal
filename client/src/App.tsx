@@ -1,5 +1,5 @@
-import { Switch, Route, useLocation } from "wouter";
-import { useEffect } from "react";
+import { Switch, Route, Router as WouterRouter } from "wouter";
+import { useState, useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -17,12 +17,12 @@ import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 function ScrollToTop() {
-  const [location] = useLocation();
-  
+  const [location] = useHashLocation();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
-  
+
   return null;
 }
 
@@ -36,8 +36,27 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Hash location hook for GitHub Pages compatibility
+const useHashLocation = (): [string, (to: string) => void] => {
+  const [loc, setLoc] = useState(window.location.hash.replace(/^#/, "") || "/");
+
+  useEffect(() => {
+    const handler = () => setLoc(window.location.hash.replace(/^#/, "") || "/");
+
+    // Subscribe to hash changes
+    window.addEventListener("hashchange", handler);
+    return () => window.removeEventListener("hashchange", handler);
+  }, []);
+
+  const navigate = (to: string) => {
+    window.location.hash = to;
+  };
+
+  return [loc, navigate];
+};
+
 function Router() {
-  const [location] = useLocation();
+  const [location] = useHashLocation();
   const isAdminRoute = location.startsWith("/admin");
 
   if (isAdminRoute) {
@@ -45,17 +64,19 @@ function Router() {
   }
 
   return (
-    <MainLayout>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/about" component={About} />
-        <Route path="/services" component={Services} />
-        <Route path="/process" component={Process} />
-        <Route path="/pricing" component={Pricing} />
-        <Route path="/contact" component={Contact} />
-        <Route component={NotFound} />
-      </Switch>
-    </MainLayout>
+    <WouterRouter hook={useHashLocation}>
+      <MainLayout>
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/about" component={About} />
+          <Route path="/services" component={Services} />
+          <Route path="/process" component={Process} />
+          <Route path="/pricing" component={Pricing} />
+          <Route path="/contact" component={Contact} />
+          <Route component={NotFound} />
+        </Switch>
+      </MainLayout>
+    </WouterRouter>
   );
 }
 

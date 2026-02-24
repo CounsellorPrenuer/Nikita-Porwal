@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Check, Star, Sparkles } from "lucide-react";
+import { Check, Star, Sparkles, Loader2, ArrowRight } from "lucide-react";
+import { sanityClient } from "@/lib/sanity";
+import { RazorpayButton } from "./RazorpayButton";
 
 interface Package {
   id: string;
@@ -14,6 +16,7 @@ interface Package {
   description: string;
   features: string[];
   highlighted?: boolean;
+  paymentButtonId?: string;
 }
 
 interface Category {
@@ -22,156 +25,12 @@ interface Category {
   packages: Package[];
 }
 
-const pricingCategories: Category[] = [
-  {
-    id: "8-9",
-    name: "8-9 Students",
-    packages: [
-      {
-        id: "8-9-discover",
-        name: "Discover",
-        price: 5500,
-        description: "Perfect for students starting their educational journey",
-        features: [
-          "Psychometric Assessment",
-          "Strengths & Interests Mapping",
-          "Subject Selection Guidance",
-          "One-on-One Counseling Session",
-          "Career Awareness Workshop",
-          "Report with Recommendations",
-        ],
-      },
-      {
-        id: "8-9-discover-plus",
-        name: "Discover Plus+",
-        price: 15000,
-        description: "Comprehensive guidance for serious learners",
-        features: [
-          "Everything in Discover",
-          "Advanced Aptitude Testing",
-          "Multiple Counseling Sessions",
-          "Parent-Teacher Guidance",
-          "Skill Development Roadmap",
-          "6-Month Follow-up Support",
-          "Personalized Learning Plan",
-          "Priority WhatsApp Support",
-        ],
-        highlighted: true,
-      },
-    ],
-  },
-  {
-    id: "10-12",
-    name: "10-12 Students",
-    packages: [
-      {
-        id: "10-12-achieve",
-        name: "Achieve Online",
-        price: 5999,
-        description: "Stream selection and career pathway guidance",
-        features: [
-          "Stream Selection Assessment",
-          "Aptitude & Interest Analysis",
-          "Career Pathway Mapping",
-          "Subject Combination Advice",
-          "One-on-One Counseling",
-          "Detailed Career Report",
-        ],
-      },
-      {
-        id: "10-12-achieve-plus",
-        name: "Achieve Plus+",
-        price: 10599,
-        description: "Complete guidance for board exam students",
-        features: [
-          "Everything in Achieve Online",
-          "Entrance Exam Preparation Tips",
-          "College Selection Guidance",
-          "Multiple Counseling Sessions",
-          "Scholarship Information",
-          "Study Abroad Consultation",
-          "3-Month Follow-up Support",
-          "Priority WhatsApp Support",
-        ],
-        highlighted: true,
-      },
-    ],
-  },
-  {
-    id: "college",
-    name: "College Graduates",
-    packages: [
-      {
-        id: "college-ascend",
-        name: "Ascend Online",
-        price: 6499,
-        description: "Launch your career with expert guidance",
-        features: [
-          "Career Assessment",
-          "Industry-Aligned Skill Analysis",
-          "Resume Building Guidance",
-          "Interview Preparation Tips",
-          "Job Market Insights",
-          "Career Roadmap Report",
-        ],
-      },
-      {
-        id: "college-ascend-plus",
-        name: "Ascend Plus+",
-        price: 10599,
-        description: "Comprehensive career launch program",
-        features: [
-          "Everything in Ascend Online",
-          "LinkedIn Profile Optimization",
-          "Mock Interview Sessions",
-          "Higher Education Guidance",
-          "Industry Connect Sessions",
-          "3-Month Career Support",
-          "Personalized Growth Plan",
-          "Priority WhatsApp Support",
-        ],
-        highlighted: true,
-      },
-    ],
-  },
-  {
-    id: "working",
-    name: "Working Professionals",
-    packages: [
-      {
-        id: "working-ascend",
-        name: "Ascend Online",
-        price: 6499,
-        description: "Navigate your career transition successfully",
-        features: [
-          "Career Transition Assessment",
-          "Skill Gap Analysis",
-          "Industry Trend Insights",
-          "Personal Branding Strategy",
-          "One-on-One Counseling",
-          "Career Pivot Roadmap",
-        ],
-      },
-      {
-        id: "working-ascend-plus",
-        name: "Ascend Plus+",
-        price: 10599,
-        description: "Complete career transformation program",
-        features: [
-          "Everything in Ascend Online",
-          "Executive Resume Building",
-          "Leadership Coaching Session",
-          "Networking Strategy",
-          "Upskilling Recommendations",
-          "3-Month Career Mentoring",
-          "Priority WhatsApp Support",
-          "Exclusive Webinar Access",
-        ],
-        highlighted: true,
-      },
-    ],
-  },
-];
+interface CustomPackage {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+}
 
 interface PricingSectionProps {
   onSelectPackage?: (packageId: string, packageName: string, price: number, categoryName: string) => void;
@@ -179,6 +38,54 @@ interface PricingSectionProps {
 
 export function PricingSection({ onSelectPackage }: PricingSectionProps) {
   const [activeTab, setActiveTab] = useState("8-9");
+  const [pricingCategories, setPricingCategories] = useState<Category[]>([]);
+  const [customPackages, setCustomPackages] = useState<CustomPackage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchPricing() {
+      try {
+        const query = `*[_type == "pricingCategory"] | order(orderId asc) {
+          "id": orderId,
+          name,
+          "packages": *[_type == "pricingPackage" && categoryId == ^.orderId] | order(price asc) {
+            "id": _id,
+            name,
+            price,
+            originalPrice,
+            description,
+            features,
+            highlighted,
+            paymentButtonId
+          }
+        }`;
+
+        const customQuery = `*[_type == "customPackage"] | order(orderId asc) {
+          id,
+          title,
+          description,
+          price
+        }`;
+
+        const [categories, customPgks] = await Promise.all([
+          sanityClient.fetch(query),
+          sanityClient.fetch(customQuery)
+        ]);
+
+        setPricingCategories(categories);
+        setCustomPackages(customPgks);
+
+        if (categories.length > 0) {
+          setActiveTab(categories[0].id);
+        }
+      } catch (err) {
+        console.error("Failed to fetch pricing from Sanity", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchPricing();
+  }, []);
 
   const handleSelectPackage = (category: Category, pkg: Package) => {
     if (onSelectPackage) {
@@ -186,8 +93,14 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
     }
   };
 
+  const handleCustomPackageInquiry = (pkgName: string) => {
+    const subject = encodeURIComponent(`Inquiry for Custom Package: ${pkgName}`);
+    const body = encodeURIComponent(`Hi!\n\nI am interested in the ${pkgName} package. Please let me know how I can proceed.\n\nThanks!`);
+    window.location.href = `mailto:royjohnson@careerplans.pro?subject=${subject}&body=${body}`;
+  };
+
   return (
-    <section className="py-24" id="pricing">
+    <section className="py-24 bg-gradient-to-b from-background to-muted/20" id="pricing">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
@@ -205,104 +118,162 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-12 h-auto p-1 bg-muted/50 backdrop-blur-sm">
-            {pricingCategories.map((category) => (
-              <TabsTrigger
-                key={category.id}
-                value={category.id}
-                className="py-3 px-4 text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                data-testid={`tab-${category.id}`}
-              >
-                {category.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <>
+            {pricingCategories.length > 0 ? (
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-24">
+                <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-12 h-auto p-1 bg-muted/50 backdrop-blur-sm">
+                  {pricingCategories.map((category) => (
+                    <TabsTrigger
+                      key={category.id}
+                      value={category.id}
+                      className="py-3 px-4 text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      data-testid={`tab-${category.id}`}
+                    >
+                      {category.name}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
 
-          {pricingCategories.map((category) => (
-            <TabsContent key={category.id} value={category.id} className="mt-0">
-              <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                {category.packages.map((pkg, index) => (
-                  <Card
-                    key={pkg.id}
-                    className={`relative p-8 transition-all duration-300 hover-elevate ${
-                      pkg.highlighted
-                        ? "border-primary/50 bg-gradient-to-b from-primary/5 to-transparent"
-                        : "bg-card/80 backdrop-blur-sm border-border/50"
-                    }`}
-                    data-testid={`card-package-${category.id}-${index}`}
-                  >
-                    {pkg.highlighted && (
-                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-accent text-white border-0">
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        Most Popular
-                      </Badge>
-                    )}
+                {pricingCategories.map((category) => (
+                  <TabsContent key={category.id} value={category.id} className="mt-0">
+                    <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                      {category.packages.map((pkg, index) => (
+                        <Card
+                          key={pkg.id}
+                          className={`relative p-8 transition-all duration-300 hover-elevate overflow-hidden ${pkg.highlighted
+                              ? "border-primary/50 shadow-lg"
+                              : "bg-card/80 backdrop-blur-sm border-border/50"
+                            }`}
+                          data-testid={`card-package-${category.id}-${index}`}
+                        >
+                          {pkg.highlighted && (
+                            <div className="absolute top-0 right-0 h-full w-full bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+                          )}
 
-                    <div className="text-center mb-6">
-                      <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
-                      <p className="text-muted-foreground text-sm mb-4">{pkg.description}</p>
-                      <div className="flex items-baseline justify-center gap-1">
-                        <span className="text-4xl font-bold">
+                          {pkg.highlighted && (
+                            <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-accent text-white border-0 z-10 px-3 py-1">
+                              <Sparkles className="w-3.5 h-3.5 mr-1" />
+                              Most Popular
+                            </Badge>
+                          )}
+
+                          <div className="text-center mb-6 relative z-10">
+                            <h3 className="text-2xl font-bold mb-2">{pkg.name}</h3>
+                            <p className="text-muted-foreground text-sm mb-4 h-10">{pkg.description}</p>
+                            <div className="flex items-baseline justify-center gap-1">
+                              <span className="text-4xl font-extrabold tracking-tight">
+                                {pkg.price.toLocaleString("en-IN", {
+                                  style: "currency",
+                                  currency: "INR",
+                                  maximumFractionDigits: 0,
+                                })}
+                              </span>
+                            </div>
+                            {pkg.originalPrice && (
+                              <p className="text-muted-foreground text-sm line-through mt-1">
+                                {pkg.originalPrice.toLocaleString("en-IN", {
+                                  style: "currency",
+                                  currency: "INR",
+                                  maximumFractionDigits: 0,
+                                })}
+                              </p>
+                            )}
+                          </div>
+
+                          <ul className="space-y-4 mb-8 relative z-10 min-h-[160px]">
+                            {pkg.features?.map((feature, featureIndex) => (
+                              <li key={featureIndex} className="flex items-start gap-4">
+                                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <Check className="w-3.5 h-3.5 text-primary" />
+                                </div>
+                                <span className="text-sm text-foreground/90 leading-relaxed font-medium">{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <div className="relative z-10 pt-4">
+                            {pkg.paymentButtonId ? (
+                              <RazorpayButton paymentButtonId={pkg.paymentButtonId} />
+                            ) : (
+                              <Button
+                                className={`w-full group ${pkg.highlighted
+                                    ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-md hover:shadow-lg transition-all"
+                                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                                  }`}
+                                variant={pkg.highlighted ? "default" : "secondary"}
+                                size="lg"
+                                onClick={() => handleSelectPackage(category, pkg)}
+                                data-testid={`button-select-${category.id}-${index}`}
+                              >
+                                Choose {pkg.name}
+                                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                              </Button>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            ) : null}
+
+            {customPackages.length > 0 && (
+              <div className="mt-20 pt-16 border-t border-border/50">
+                <div className="text-center max-w-2xl mx-auto mb-12">
+                  <h3 className="text-2xl font-bold mb-3">Customize Your Plan</h3>
+                  <p className="text-muted-foreground">Build a package that perfectly fits your specific needs.</p>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {customPackages.map((pkg) => (
+                    <Card key={pkg.id} className="p-6 flex flex-col h-full hover:border-primary/50 transition-colors">
+                      <div className="mb-4 flex-grow">
+                        <h4 className="text-lg font-bold mb-2 leading-tight">{pkg.title}</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{pkg.description}</p>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
+                        <span className="font-bold text-lg">
                           {pkg.price.toLocaleString("en-IN", {
                             style: "currency",
                             currency: "INR",
                             maximumFractionDigits: 0,
                           })}
                         </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="hover:bg-primary hover:text-primary-foreground group"
+                          onClick={() => handleCustomPackageInquiry(pkg.title)}
+                        >
+                          Inquire
+                          <ArrowRight className="w-3 h-3 ml-2 group-hover:translate-x-1 transition-transform" />
+                        </Button>
                       </div>
-                      {pkg.originalPrice && (
-                        <p className="text-muted-foreground text-sm line-through mt-1">
-                          {pkg.originalPrice.toLocaleString("en-IN", {
-                            style: "currency",
-                            currency: "INR",
-                            maximumFractionDigits: 0,
-                          })}
-                        </p>
-                      )}
-                    </div>
-
-                    <ul className="space-y-3 mb-8">
-                      {pkg.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-start gap-3">
-                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <Check className="w-3 h-3 text-primary" />
-                          </div>
-                          <span className="text-sm text-muted-foreground">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <Button
-                      className={`w-full ${
-                        pkg.highlighted
-                          ? "bg-gradient-to-r from-primary to-accent hover:opacity-90"
-                          : ""
-                      }`}
-                      variant={pkg.highlighted ? "default" : "outline"}
-                      size="lg"
-                      onClick={() => handleSelectPackage(category, pkg)}
-                      data-testid={`button-select-${category.id}-${index}`}
-                    >
-                      Choose {pkg.name}
-                    </Button>
-                  </Card>
-                ))}
+                    </Card>
+                  ))}
+                </div>
               </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+            )}
 
-        <div className="mt-16 text-center">
-          <p className="text-muted-foreground mb-4">
-            Need a customized package? We can create one just for you.
-          </p>
-          <Link href="/contact">
-            <Button variant="outline" size="lg" data-testid="button-custom-package">
-              Contact for Custom Package
-            </Button>
-          </Link>
-        </div>
+            <div className="mt-16 text-center">
+              <p className="text-muted-foreground mb-4">
+                Not sure which package is right for you?
+              </p>
+              <Link href="/contact">
+                <Button variant="ghost" className="gap-2">
+                  Contact Us for Help
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

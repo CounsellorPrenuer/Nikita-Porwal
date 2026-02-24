@@ -14,6 +14,11 @@ export default function NotFound() {
           <p className="mt-4 text-sm text-gray-600">
             Did you forget to add the page to the router?
           </p>
+          <div className="mt-4 p-4 bg-gray-100 rounded text-xs font-mono text-left">
+            <p>Debug Info:</p>
+            <p>Location: {window.location.pathname}</p>
+            <p>Hash: {window.location.hash}</p>
+          </div>
         </CardContent>
       </Card>
     </div>

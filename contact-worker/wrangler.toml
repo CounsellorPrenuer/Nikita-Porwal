@@ -1,0 +1,8 @@
+name = "nikita-porwal-contacts-worker"
+main = "src/index.ts"
+compatibility_date = "2024-02-24"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nikita-porwal-contact-v3"
+database_id = "5a2b3296-3555-448f-a38c-47961bb73ba0"

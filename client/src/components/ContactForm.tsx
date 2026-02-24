@@ -50,18 +50,45 @@ export function ContactForm() {
     },
   });
 
-  const onSubmit = (data: FormData) => {
-    // todo: remove mock functionality - connect to backend
-    console.log("Form submitted:", data);
-    setIsSubmitted(true);
-    toast({
-      title: "Message Sent!",
-      description: "We'll get back to you within 24 hours.",
-    });
-    setTimeout(() => {
-      setIsSubmitted(false);
-      form.reset();
-    }, 3000);
+  const onSubmit = async (data: FormData) => {
+    try {
+      // First, attempt to save the contact in the database
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save contact");
+      }
+
+      // Then, construct the subject and body for the email
+      const subject = encodeURIComponent(`New Inquiry from ${data.name}`);
+      const bodyText = `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nInquiry Type: ${data.inquiryType}\n\nMessage:\n${data.message}`;
+      const body = encodeURIComponent(bodyText);
+
+      // Trigger the email
+      window.location.href = `mailto:with.nikita@gmail.com?subject=${subject}&body=${body}`;
+
+      setIsSubmitted(true);
+      toast({
+        title: "Message Sent!",
+        description: "We'll get back to you within 24 hours.",
+      });
+      setTimeout(() => {
+        setIsSubmitted(false);
+        form.reset();
+      }, 3000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit the form. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -78,7 +105,7 @@ export function ContactForm() {
             </span>
           </h2>
           <p className="text-muted-foreground text-lg">
-            Have questions? We&apos;d love to hear from you. Send us a message 
+            Have questions? We&apos;d love to hear from you. Send us a message
             and we&apos;ll respond as soon as possible.
           </p>
         </div>

@@ -7,20 +7,22 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+import { MOCK_RAZORPAY_CONFIG, MOCK_USER, MOCK_REVIEWS, MOCK_BLOGS } from "./mockData";
+import { sanityClient } from "./sanity";
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
-    method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
+  console.log(`[MOCK] ${method} ${url}`, data);
 
-  await throwIfResNotOk(res);
-  return res;
+  // Mock API responses
+  if (url === "/api/razorpay/create-order") {
+    return new Response(JSON.stringify({ error: "Payment system not available in static mode" }), { status: 400 });
+  }
+
+  return new Response(JSON.stringify({}), { status: 200 });
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -28,18 +30,36 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
-      credentials: "include",
-    });
+    async ({ queryKey }) => {
+      const url = queryKey.join("/");
+      console.log(`[MOCK] GET ${url}`);
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      if (url === "/api/razorpay/config") return MOCK_RAZORPAY_CONFIG as any;
+      if (url === "/api/user") return MOCK_USER as any; // Simulate logged out
+
+      if (url === "/api/admin/reviews") {
+        try {
+          const reviews = await sanityClient.fetch(`*[_type == "review"]`);
+          return reviews;
+        } catch (err) {
+          console.error("Sanity reviews fetch failed", err);
+          return [];
+        }
+      }
+
+      if (url === "/api/admin/blogs") {
+        try {
+          const blogs = await sanityClient.fetch(`*[_type == "blog"]`);
+          return blogs;
+        } catch (err) {
+          console.error("Sanity blogs fetch failed", err);
+          return [];
+        }
+      }
+
+      // Default empty response
       return null;
-    }
-
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
+    };
 
 export const queryClient = new QueryClient({
   defaultOptions: {
