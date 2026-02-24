@@ -96,7 +96,12 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
   const handleCustomPackageInquiry = (pkgName: string) => {
     const subject = encodeURIComponent(`Inquiry for Custom Package: ${pkgName}`);
     const body = encodeURIComponent(`Hi!\n\nI am interested in the ${pkgName} package. Please let me know how I can proceed.\n\nThanks!`);
-    window.location.href = `mailto:royjohnson@careerplans.pro?subject=${subject}&body=${body}`;
+    const mailLink = document.createElement("a");
+    mailLink.href = `mailto:with.nikita@gmail.com?subject=${subject}&body=${body}`;
+    mailLink.target = "_blank";
+    document.body.appendChild(mailLink);
+    mailLink.click();
+    document.body.removeChild(mailLink);
   };
 
   return (
@@ -146,8 +151,8 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                         <Card
                           key={pkg.id}
                           className={`relative p-8 transition-all duration-300 hover-elevate overflow-hidden ${pkg.highlighted
-                              ? "border-primary/50 shadow-lg"
-                              : "bg-card/80 backdrop-blur-sm border-border/50"
+                            ? "border-primary/50 shadow-lg"
+                            : "bg-card/80 backdrop-blur-sm border-border/50"
                             }`}
                           data-testid={`card-package-${category.id}-${index}`}
                         >
@@ -202,8 +207,8 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
                             ) : (
                               <Button
                                 className={`w-full group ${pkg.highlighted
-                                    ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-md hover:shadow-lg transition-all"
-                                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                                  ? "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-md hover:shadow-lg transition-all"
+                                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                                   }`}
                                 variant={pkg.highlighted ? "default" : "secondary"}
                                 size="lg"
@@ -226,8 +231,8 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
             {customPackages.length > 0 && (
               <div className="mt-20 pt-16 border-t border-border/50">
                 <div className="text-center max-w-2xl mx-auto mb-12">
-                  <h3 className="text-2xl font-bold mb-3">Customize Your Plan</h3>
-                  <p className="text-muted-foreground">Build a package that perfectly fits your specific needs.</p>
+                  <h3 className="text-2xl font-bold mb-3">Want To Customise Your Mentorship Plan?</h3>
+                  <p className="text-muted-foreground">If you want to subscribe to specific services from Mentoria that resolve your career challenges, you can choose one or more of the following:</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
