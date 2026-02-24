@@ -53,7 +53,7 @@ export function ContactForm() {
   const onSubmit = async (data: FormData) => {
     try {
       // First, attempt to save the contact in the database
-      const response = await fetch("/api/contact", {
+      const response = await fetch("https://nikita-porwal.garyphadale.workers.dev/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
