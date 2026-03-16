@@ -6,6 +6,7 @@ import { PricingSection } from "@/components/PricingSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { ContactForm } from "@/components/ContactForm";
 import { PoweredBySection } from "@/components/PoweredBySection";
+import { BlogSection } from "@/components/BlogSection";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
@@ -143,6 +144,7 @@ export default function Home() {
       <section id="services"><ServicesSection /></section>
       <StatsCounter />
       <section id="pricing"><PricingSection onSelectPackage={handleSelectPackage} /></section>
+      <section id="blog"><BlogSection /></section>
       <TestimonialsSection />
       <section id="contact"><ContactForm /></section>
       <PoweredBySection />

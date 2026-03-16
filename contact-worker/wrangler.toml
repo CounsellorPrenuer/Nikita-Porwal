@@ -1,4 +1,4 @@
-name = "nikita-porwal"
+name = "nikitaporwal-worker"
 account_id = "aa4372054b04b9e122c8f7ae701b207fe"
 main = "src/index.ts"
 compatibility_date = "2024-02-24"

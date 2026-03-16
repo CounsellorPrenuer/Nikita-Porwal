@@ -4,7 +4,7 @@ import { structureTool } from 'sanity/structure'
 export default defineConfig({
     name: 'default',
     title: 'Nikita Porwal - EduVista',
-    projectId: 't6wag8hb',
+    projectId: '7fwra7kt',
     dataset: 'production',
     plugins: [structureTool()],
     schema: {
