@@ -11,7 +11,7 @@ const sanityWriteClient = createClient({
 const standardCategories = [
     {
         id: "1",
-        name: "8-9 Students",
+        name: "8-10 Students",
         packages: [
             {
                 id: "pkg-1",
