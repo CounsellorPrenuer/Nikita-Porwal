@@ -5,6 +5,7 @@ export const sanityClient = createClient({
     dataset: "production", // default dataset
     useCdn: false, // Disabling CDN to bypass possible CORS cache issue
     apiVersion: "2024-02-24", // use current date
+    token: "ska0Vwzw3WI3JM3AbZIEkDGwTHjw8kFXHWaMEtWQEngT8261ET3AZoYblKMd88VqBqLgpcXl8AtYOAaM2c8CzjmLKZLdLjjOhovJpy5jMwwStmOYOVNKcJ0IXDcytrkt64PZEiEZcmDlNvaBPAW4AJxGMPdVeEGXIKvElMjznhZ2GKL4UG6m",
 });
 
 // Used for writing data
@@ -13,5 +14,5 @@ export const sanityWriteClient = createClient({
     dataset: "production",
     useCdn: false,
     apiVersion: "2024-02-24",
-    token: "skID5ieTH8eky97d7YoqsbzMpZVm144ktePbezZpDXNp8D2Sbr51Fbv157WI5iTbz05iek7RnOJeDL9Lo1Rflf7FHJf9s5RZ7wcYR48InnO4L5f5u0CRLN0qp2uLYQL03vdcdUjlaivxsENIym8e4JnSeOWXHTOOyj9jP1UeyqqwZye0iGUv",
+    token: "sksftTYRzY8Qpdp1zmohuc95DFyAB3VPiQztgGMv7sRGK8D92XJ2nb13pTNxml5rtrvpIb6FTxkMJUlGcWYbAC4eONJ7QjAtLsn1LxcqrAeMdj9y3McO5Jpf21nThhoY0VqbiTNzzWn4vuF5PCcF3Dwo1qrFOtyRMjZu0HK7CCPrU8z6RpYm",
 });

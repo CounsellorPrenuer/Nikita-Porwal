@@ -5,7 +5,7 @@ const sanityWriteClient = createClient({
     dataset: "production",
     useCdn: false,
     apiVersion: "2024-02-24",
-    token: "skID5ieTH8eky97d7YoqsbzMpZVm144ktePbezZpDXNp8D2Sbr51Fbv157WI5iTbz05iek7RnOJeDL9Lo1Rflf7FHJf9s5RZ7wcYR48InnO4L5f5u0CRLN0qp2uLYQL03vdcdUjlaivxsENIym8e4JnSeOWXHTOOyj9jP1UeyqqwZye0iGUv",
+    token: "sksftTYRzY8Qpdp1zmohuc95DFyAB3VPiQztgGMv7sRGK8D92XJ2nb13pTNxml5rtrvpIb6FTxkMJUlGcWYbAC4eONJ7QjAtLsn1LxcqrAeMdj9y3McO5Jpf21nThhoY0VqbiTNzzWn4vuF5PCcF3Dwo1qrFOtyRMjZu0HK7CCPrU8z6RpYm",
 });
 
 const standardCategories = [
