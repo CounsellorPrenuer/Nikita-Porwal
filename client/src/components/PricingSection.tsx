@@ -45,42 +45,18 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
   useEffect(() => {
     async function fetchPricing() {
       try {
-        const query = `*[_type == "pricingCategory"] | order(orderId asc) {
-          "id": orderId,
-          name,
-          "packages": *[_type == "pricingPackage" && categoryId == ^.orderId] | order(price asc) {
-            "id": _id,
-            name,
-            price,
-            originalPrice,
-            description,
-            features,
-            highlighted,
-            paymentButtonId
-          }
-        }`;
+        const response = await fetch(`${import.meta.env.VITE_RAZORPAY_WORKER_URL || 'https://nikitaporwal-worker.garyphadale.workers.dev'}/api/pricing`);
+        if (!response.ok) throw new Error("Failed to fetch pricing");
+        const data = await response.json();
+        
+        setPricingCategories(data.categories || []);
+        setCustomPackages(data.customPackages || []);
 
-        const customQuery = `*[_type == "customPackage"] | order(orderId asc) {
-          "id": _id,
-          "planId": id,
-          title,
-          description,
-          price
-        }`;
-
-        const [categories, customPkgs] = await Promise.all([
-          sanityClient.fetch(query),
-          sanityClient.fetch(customQuery)
-        ]);
-
-        setPricingCategories(categories);
-        setCustomPackages(customPkgs);
-
-        if (categories.length > 0) {
-          setActiveTab(categories[0].id);
+        if (data.categories && data.categories.length > 0) {
+          setActiveTab(data.categories[0].id);
         }
       } catch (err) {
-        console.error("Failed to fetch pricing from Sanity", err);
+        console.error("Failed to fetch pricing from worker", err);
       } finally {
         setIsLoading(false);
       }

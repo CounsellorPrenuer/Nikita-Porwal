@@ -65,20 +65,20 @@ export const getQueryFn: <T>(options: {
 
       if (url === "/api/admin/reviews") {
         try {
-          const reviews = await sanityClient.fetch(`*[_type == "review"]`);
-          return reviews;
+          const response = await fetch(`${RAZORPAY_WORKER_URL}/api/reviews`);
+          return response.ok ? await response.json() : [];
         } catch (err) {
-          console.error("Sanity reviews fetch failed", err);
+          console.error("Worker reviews fetch failed", err);
           return [];
         }
       }
 
       if (url === "/api/admin/blogs") {
         try {
-          const blogs = await sanityClient.fetch(`*[_type == "blog"]`);
-          return blogs;
+          const response = await fetch(`${RAZORPAY_WORKER_URL}/api/blogs`);
+          return response.ok ? await response.json() : [];
         } catch (err) {
-          console.error("Sanity blogs fetch failed", err);
+          console.error("Worker blogs fetch failed", err);
           return [];
         }
       }

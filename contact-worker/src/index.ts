@@ -3,6 +3,8 @@ export interface Env {
     RAZORPAY_KEY_ID: string;
     RAZORPAY_KEY_SECRET: string;
     RAZORPAY_WEBHOOK_SECRET: string;
+    SANITY_PROJECT_ID: string;
+    SANITY_TOKEN: string;
 }
 
 const corsHeaders = {
@@ -11,7 +13,7 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-// Predefined coupon codes in worker (production should ideally use DB)
+// Predefined coupon codes
 const COUPON_CODES: Record<string, { discount: number; type: "percent" | "flat"; label: string }> = {
     "NIKITA10": { discount: 10, type: "percent", label: "10% off" },
     "NIKITA20": { discount: 20, type: "percent", label: "20% off" },
@@ -61,6 +63,73 @@ export default {
                 return new Response('Setup Complete', { headers: corsHeaders });
             }
 
+            // GET /api/pricing (Proxy to Sanity)
+            if (url.pathname === '/api/pricing') {
+                const query = encodeURIComponent(`*[_type == "pricingCategory"] | order(orderId asc) {
+                    "id": orderId,
+                    name,
+                    "packages": *[_type == "pricingPackage" && categoryId == ^.orderId] | order(price asc) {
+                        "id": _id,
+                        name,
+                        price,
+                        originalPrice,
+                        description,
+                        features,
+                        highlighted,
+                        paymentButtonId
+                    }
+                }`);
+                const customQuery = encodeURIComponent(`*[_type == "customPackage"] | order(orderId asc) {
+                    "id": _id,
+                    "planId": id,
+                    title,
+                    description,
+                    price
+                }`);
+
+                const [res1, res2] = await Promise.all([
+                    fetch(`https://${env.SANITY_PROJECT_ID}.api.sanity.io/v1/data/query/production?query=${query}`, {
+                        headers: { 'Authorization': `Bearer ${env.SANITY_TOKEN}` }
+                    }),
+                    fetch(`https://${env.SANITY_PROJECT_ID}.api.sanity.io/v1/data/query/production?query=${customQuery}`, {
+                        headers: { 'Authorization': `Bearer ${env.SANITY_TOKEN}` }
+                    })
+                ]);
+
+                const [data1, data2]: [any, any] = await Promise.all([res1.json(), res2.json()]);
+                
+                return new Response(JSON.stringify({ 
+                    categories: data1.result || [], 
+                    customPackages: data2.result || [] 
+                }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                });
+            }
+
+            // GET /api/blogs (Proxy to Sanity)
+            if (url.pathname === '/api/blogs') {
+                const query = encodeURIComponent(`*[_type == "blog"]`);
+                const res = await fetch(`https://${env.SANITY_PROJECT_ID}.api.sanity.io/v1/data/query/production?query=${query}`, {
+                    headers: { 'Authorization': `Bearer ${env.SANITY_TOKEN}` }
+                });
+                const data: any = await res.json();
+                return new Response(JSON.stringify(data.result || []), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                });
+            }
+
+            // GET /api/reviews (Proxy to Sanity)
+            if (url.pathname === '/api/reviews') {
+                const query = encodeURIComponent(`*[_type == "review"]`);
+                const res = await fetch(`https://${env.SANITY_PROJECT_ID}.api.sanity.io/v1/data/query/production?query=${query}`, {
+                    headers: { 'Authorization': `Bearer ${env.SANITY_TOKEN}` }
+                });
+                const data: any = await res.json();
+                return new Response(JSON.stringify(data.result || []), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                });
+            }
+
             // GET /api/razorpay/config
             if (url.pathname === '/api/razorpay/config') {
                 return new Response(JSON.stringify({ 
@@ -85,8 +154,6 @@ export default {
             // POST /api/razorpay/create-order
             if (request.method === 'POST' && url.pathname === '/api/razorpay/create-order') {
                 const data: any = await request.json();
-                
-                // Razorpay API requires Basic Auth (KeyId:KeySecret)
                 const auth = btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`);
                 
                 const response = await fetch('https://api.razorpay.com/v1/orders', {
@@ -96,7 +163,7 @@ export default {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        amount: Math.round(data.amount * 100), // Amount in paise
+                        amount: Math.round(data.amount * 100),
                         currency: 'INR',
                         receipt: `receipt_${Date.now()}`,
                         notes: {
@@ -125,8 +192,6 @@ export default {
             // POST /api/razorpay/verify-payment
             if (request.method === 'POST' && url.pathname === '/api/razorpay/verify-payment') {
                 const data: any = await request.json();
-                
-                // Verification logic on worker (HMAC SHA256)
                 const body = data.razorpay_order_id + "|" + data.razorpay_payment_id;
                 const encoder = new TextEncoder();
                 const key = await crypto.subtle.importKey(
@@ -147,7 +212,6 @@ export default {
                     });
                 }
 
-                // Save to payments table
                 await env.DB.prepare(
                     `INSERT INTO payments (orderId, paymentId, signature, status) VALUES (?, ?, ?, ?)`
                 ).bind(data.razorpay_order_id, data.razorpay_payment_id, data.razorpay_signature, 'verified').run();
