@@ -25,6 +25,7 @@ export async function apiRequest(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+    await throwIfResNotOk(res);
     return res;
   }
 
@@ -34,6 +35,7 @@ export async function apiRequest(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+    await throwIfResNotOk(res);
     return res;
   }
 

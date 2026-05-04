@@ -66,7 +66,7 @@ export default defineConfig({
                     { name: 'title', title: 'Title', type: 'string' },
                     { name: 'slug', title: 'Slug', type: 'slug', options: { source: 'title' } },
                     { name: 'summary', title: 'Summary', type: 'text' },
-                    { name: 'body', title: 'Body', type: 'array', of: [{ type: 'block' }] },
+                    { name: 'body', title: 'Body', type: 'text' },
                     { name: 'status', title: 'Status', type: 'string' },
                     { name: 'publishedAt', title: 'Published At', type: 'datetime' },
                     { name: 'coverImageUrl', title: 'Cover Image URL', type: 'url' },

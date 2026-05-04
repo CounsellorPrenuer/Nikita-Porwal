@@ -59,6 +59,12 @@ async function buildAll() {
     external: externals,
     logLevel: "info",
   });
+
+  // Post-build steps for GitHub Pages
+  const { copyFile, writeFile } = await import("fs/promises");
+  await copyFile("dist/index.html", "dist/404.html");
+  await writeFile("dist/.nojekyll", "");
+  console.log("GitHub Pages preparation complete (404.html, .nojekyll created)");
 }
 
 buildAll().catch((err) => {

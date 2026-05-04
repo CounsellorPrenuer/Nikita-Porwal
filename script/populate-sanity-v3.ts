@@ -136,7 +136,60 @@ const standardCategories = [
 ];
 
 const customPackages = [
-    // ... (existing custom packages)
+    {
+        _id: "custom-career-report",
+        _type: "customPackage",
+        id: "career-report",
+        title: "Career Report",
+        price: 1500,
+        description: "Get a detailed report of your psychometric assessment for a scientific analysis of your interests. Find out where your interests lie and which future paths you can potentially consider.",
+        orderId: 1
+    },
+    {
+        _id: "custom-career-report-counselling",
+        _type: "customPackage",
+        id: "career-report-counselling",
+        title: "Career Report + Career Counselling",
+        price: 3000,
+        description: "Connect with India's top career coaches to analyse your psychometric report and shortlist the top three career paths you're most likely to enjoy and excel at.",
+        orderId: 2
+    },
+    {
+        _id: "custom-knowledge-gateway",
+        _type: "customPackage",
+        id: "knowledge-gateway",
+        title: "Knowledge Gateway + Career Helpline Access",
+        price: 100,
+        description: "Unlock holistic information on your career paths and get direct access to Mentoria's experts, who will resolve your career-related queries through our dedicated Career Helpline. Validate your career decisions from now until you land a job you love.",
+        orderId: 3
+    },
+    {
+        _id: "custom-one-to-one-session",
+        _type: "customPackage",
+        id: "one-to-one-session",
+        title: "One-to-One Session with a Career Expert",
+        price: 3500,
+        description: "Resolve your career queries and glimpse into your future world through a one-on-one session with an expert from your chosen field.",
+        orderId: 4
+    },
+    {
+        _id: "custom-college-admission-planning",
+        _type: "customPackage",
+        id: "college-admission-planning",
+        title: "College Admission Planning",
+        price: 3000,
+        description: "Get unbiased recommendations and details on your future college options in India and abroad, organised in one resourceful planner.",
+        orderId: 5
+    },
+    {
+        _id: "custom-exam-stress-management",
+        _type: "customPackage",
+        id: "exam-stress-management",
+        title: "Exam Stress Management",
+        price: 1000,
+        description: "Get expert guidance on tackling exam stress, planning your study schedule, revision tips and more from India's top educators. Increase your chances of acing exams with a calm and clear mind.",
+        orderId: 6
+    },
     {
         _id: "custom-cap-100",
         _type: "customPackage",
