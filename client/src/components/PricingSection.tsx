@@ -45,7 +45,7 @@ export function PricingSection({ onSelectPackage }: PricingSectionProps) {
   useEffect(() => {
     async function fetchPricing() {
       try {
-        const response = await fetch(`${import.meta.env.VITE_RAZORPAY_WORKER_URL || 'https://nikitaporwal-worker.garyphadale.workers.dev'}/api/pricing`);
+        const response = await fetch(`${import.meta.env.VITE_RAZORPAY_WORKER_URL || 'https://nikitaporwal-worker.gauravgoodreads.workers.dev'}/api/pricing`);
         if (!response.ok) throw new Error("Failed to fetch pricing");
         const data = await response.json();
         

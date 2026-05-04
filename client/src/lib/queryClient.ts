@@ -2,7 +2,7 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { MOCK_USER, MOCK_REVIEWS, MOCK_BLOGS } from "./mockData";
 import { sanityClient } from "./sanity";
 
-const RAZORPAY_WORKER_URL = "https://nikitaporwal-worker.garyphadale.workers.dev";
+const RAZORPAY_WORKER_URL = "https://nikitaporwal-worker.gauravgoodreads.workers.dev";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
